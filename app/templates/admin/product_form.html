@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('admin.new_product') if product is none else _t('admin.edit_product') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 fw-bold mb-4">
+                        {{ _t('admin.new_product') if product is none else _t('admin.edit_product') }}
+                    </h1>
+
+                    {% if product is none %}
+                        <form method="post" action="/admin/products/create" enctype="multipart/form-data">
+                    {% else %}
+                        <form method="post" action="/admin/products/{{ product.id }}/update" enctype="multipart/form-data">
+                    {% endif %}
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-semibold">{{ _t('admin.product_name') }}</label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                   value="{{ product.name if product else '' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-semibold">{{ _t('admin.product_desc') }}</label>
+                            <textarea class="form-control" id="description" name="description" rows="4">{{ product.description if product else '' }}</textarea>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="price" class="form-label fw-semibold">{{ _t('admin.product_price') }} (€)</label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="price" name="price"
+                                       value="{{ product.price if product else '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="category" class="form-label fw-semibold">{{ _t('admin.product_category') }}</label>
+                                <select class="form-select" id="category" name="category">
+                                    {% for c in categories %}
+                                        <option value="{{ c }}" {{ 'selected' if product and product.category == c }}>{{ c }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-6">
+                                <label for="software" class="form-label fw-semibold">{{ _t('admin.product_software') }}</label>
+                                <input type="text" class="form-control" id="software" name="software"
+                                       value="{{ product.software if product else '' }}" placeholder="SolidWorks 2023, AutoCAD 2023...">
+                            </div>
+                            {% if product %}
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" name="is_available"
+                                               id="is_available" {{ 'checked' if product.is_available }}>
+                                        <label class="form-check-label" for="is_available">{{ _t('product.in_stock') }}</label>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3 mt-3">
+                            <label for="image" class="form-label fw-semibold">{{ _t('admin.product_image') }}</label>
+                            {% set img_name = product.image_path.split('/')[-1].split('\\')[-1] if product and product.image_path else '' %}
+                            {% if product and product.image_path %}
+                                <div class="mb-2 text-center">
+                                    <img src="/uploads/{{ img_name }}" alt="{{ product.name }}"
+                                         class="img-fluid rounded border" style="max-height:220px;object-fit:contain">
+                                </div>
+                            {% endif %}
+                            <input type="file" class="form-control" id="image" name="image"
+                                   accept="image/*">
+                            <div class="form-text">{{ _t('admin.product_image_hint') }}</div>
+                            <div id="image-preview" class="mt-2"></div>
+                            {% if product and product.image_path %}
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="remove_image" id="remove_image">
+                                    <label class="form-check-label text-danger" for="remove_image">{{ _t('admin.product_image_remove') }}</label>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3 mt-3">
+                            <label for="gallery_images" class="form-label fw-semibold">{{ _t('admin.product_gallery') }}</label>
+                            <input type="file" class="form-control" id="gallery_images" name="gallery_images"
+                                   accept="image/*" multiple>
+                            <div class="form-text">{{ _t('admin.product_gallery_hint') }}</div>
+                            <div id="gallery-preview" class="row g-2 mt-1"></div>
+                            {% if product and product.gallery %}
+                                <div class="row g-2 mt-2">
+                                    {% for gi in product.gallery %}
+                                        <div class="col-3">
+                                            <img src="/uploads/{{ gi.image_path.split('/')[-1].split('\\')[-1] }}"
+                                                 alt="{{ product.name }}" class="img-fluid rounded border"
+                                                 style="height:80px;object-fit:contain;width:100%">
+                                            <div class="form-check mt-1">
+                                                <input class="form-check-input" type="checkbox" name="remove_gallery"
+                                                       id="remove_gallery_{{ gi.id }}" value="{{ gi.id }}">
+                                                <label class="form-check-label small text-danger" for="remove_gallery_{{ gi.id }}">
+                                                    {{ _t('admin.product_image_remove') }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3 mt-3">
+                            <label for="file" class="form-label fw-semibold">{{ _t('admin.product_file') }}</label>
+                            {% set file_name = product.file_path.split('/')[-1].split('\\')[-1] if product and product.file_path else '' %}
+                            {% set file_ext = file_name.split('.')[-1].lower() if file_name else '' %}
+                            {% if product and product.file_path %}
+                                <div class="alert alert-info d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-file-earmark-check"></i>
+                                    <span class="text-break">{{ file_name }}</span>
+                                </div>
+                                {% if file_ext in ['png', 'jpg', 'jpeg', 'gif', 'webp'] %}
+                                    <div class="mb-2 text-center">
+                                        <img src="/uploads/{{ file_name }}" alt="{{ product.name }} preview"
+                                             class="img-fluid rounded border" style="max-height:320px;object-fit:contain">
+                                    </div>
+                                {% elif file_ext == 'pdf' %}
+                                    <div class="mb-2 text-center">
+                                        <div class="ratio ratio-16x9 border rounded bg-light" style="max-width:640px;margin:0 auto">
+                                            <iframe src="/uploads/{{ file_name }}" title="{{ _t('admin.product_file') }}"></iframe>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-light border mb-2 text-center py-4">
+                                        <i class="bi bi-file-earmark-arrow-down fs-1 d-block mb-2"></i>
+                                        <a href="/uploads/{{ file_name }}" class="btn btn-sm btn-outline-primary">{{ _t('admin.download_file') }}</a>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                            <input type="file" class="form-control" id="file" name="file"
+                                   accept=".sldprt,.sldasm,.dwg,.dxf,.pdf,.zip,.step,.stp,.igs,.iges,.png,.jpg,.jpeg,.gif,.webp,.psd">
+                            <div class="form-text">{{ _t('admin.product_file_hint') }}</div>
+                            <div id="file-preview" class="mt-2"></div>
+                            {% if product and product.file_path %}
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="remove_file" id="remove_file">
+                                    <label class="form-check-label text-danger" for="remove_file">{{ _t('admin.product_file_remove') }}</label>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>{{ _t('admin.save') }}
+                            </button>
+                            <a href="/admin/products" class="btn btn-outline-secondary">{{ _t('admin.cancel') }}</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var input = document.getElementById('file');
+        var preview = document.getElementById('file-preview');
+        input.addEventListener('change', function () {
+            preview.innerHTML = '';
+            var file = input.files && input.files[0];
+            if (!file) return;
+            var ext = file.name.split('.').pop().toLowerCase();
+            var url = URL.createObjectURL(file);
+            if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
+                var img = document.createElement('img');
+                img.src = url;
+                img.className = 'img-fluid rounded border';
+                img.style.maxHeight = '320px';
+                img.style.objectFit = 'contain';
+                preview.appendChild(img);
+            } else if (ext === 'pdf') {
+                var iframe = document.createElement('iframe');
+                iframe.src = url;
+                iframe.className = 'border rounded bg-light';
+                iframe.style.width = '100%';
+                iframe.style.height = '320px';
+                preview.appendChild(iframe);
+            } else {
+                var box = document.createElement('div');
+                box.className = 'alert alert-light border text-center py-3';
+                box.innerHTML = '<i class="bi bi-file-earmark-check fs-3 d-block"></i>' + file.name;
+                preview.appendChild(box);
+            }
+        });
+
+        var imgInput = document.getElementById('image');
+        var imgPreview = document.getElementById('image-preview');
+        if (imgInput) {
+            imgInput.addEventListener('change', function () {
+                imgPreview.innerHTML = '';
+                var file = imgInput.files && imgInput.files[0];
+                if (!file) return;
+                var img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.className = 'img-fluid rounded border';
+                img.style.maxHeight = '220px';
+                img.style.objectFit = 'contain';
+                imgPreview.appendChild(img);
+            });
+        }
+
+        var galInput = document.getElementById('gallery_images');
+        var galPreview = document.getElementById('gallery-preview');
+        if (galInput) {
+            galInput.addEventListener('change', function () {
+                galPreview.innerHTML = '';
+                Array.prototype.forEach.call(galInput.files || [], function (file) {
+                    if (!/^image\//.test(file.type)) return;
+                    var col = document.createElement('div');
+                    col.className = 'col-3';
+                    var img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.className = 'img-fluid rounded border';
+                    img.style.height = '80px';
+                    img.style.objectFit = 'contain';
+                    img.style.width = '100%';
+                    col.appendChild(img);
+                    galPreview.appendChild(col);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

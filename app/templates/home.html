@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-section text-white text-center d-flex align-items-center py-5">
+    <div class="container py-5">
+        <div class="justify-content-center mb-4 d-flex reveal reveal-visible">
+            <span class="hero-badge"><i class="bi bi-stars"></i>{{ _t('home.hero_badge') }}</span>
+        </div>
+        <h1 class="display-4 fw-bold mb-3 reveal reveal-visible">{{ _t('home.hero_title') }}</h1>
+        <p class="lead mb-5 w-75 mx-auto reveal reveal-visible">{{ _t('home.hero_subtitle') }}</p>
+        <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 hero-cta reveal reveal-visible">
+            <a href="/shop" class="btn btn-primary btn-lg"><i class="bi bi-shop me-2"></i>{{ _t('home.cta_shop') }}</a>
+            <a href="/contact" class="btn btn-outline-light btn-lg">{{ _t('home.cta_contact') }}</a>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5 reveal">
+            <h2 class="section-title fw-bold mb-2 d-inline-block">{{ _t('home.features_title') }}</h2>
+            <p class="text-muted mt-3 mb-0">{{ _t('home.features_subtitle') }}</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3 reveal" style="transition-delay: 0.05s">
+                <div class="card h-100 feature-card shadow-sm border-0 text-center p-4">
+                    <span class="feature-icon mx-auto mb-4"><i class="bi bi-patch-check-fill"></i></span>
+                    <h5 class="fw-bold">{{ _t('home.feature1_title') }}</h5>
+                    <p class="text-muted mb-0 small">{{ _t('home.feature1_desc') }}</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 reveal" style="transition-delay: 0.1s">
+                <div class="card h-100 feature-card shadow-sm border-0 text-center p-4">
+                    <span class="feature-icon mx-auto mb-4"><i class="bi bi-file-earmark-cad"></i></span>
+                    <h5 class="fw-bold">{{ _t('home.feature2_title') }}</h5>
+                    <p class="text-muted mb-0 small">{{ _t('home.feature2_desc') }}</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 reveal" style="transition-delay: 0.15s">
+                <div class="card h-100 feature-card shadow-sm border-0 text-center p-4">
+                    <span class="feature-icon mx-auto mb-4"><i class="bi bi-headset"></i></span>
+                    <h5 class="fw-bold">{{ _t('home.feature3_title') }}</h5>
+                    <p class="text-muted mb-0 small">{{ _t('home.feature3_desc') }}</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 reveal" style="transition-delay: 0.2s">
+                <div class="card h-100 feature-card shadow-sm border-0 text-center p-4">
+                    <span class="feature-icon mx-auto mb-4"><i class="bi bi-lightning-charge-fill"></i></span>
+                    <h5 class="fw-bold">{{ _t('home.feature4_title') }}</h5>
+                    <p class="text-muted mb-0 small">{{ _t('home.feature4_desc') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5 reveal">
+            <h3 class="fw-bold mb-2 d-inline-block">{{ _t('app_name') }}</h3>
+            <p class="lead text-muted mt-3 mb-0">{{ _t('tagline') }}</p>
+        </div>
+        <div class="row justify-content-center g-3 reveal">
+            <div class="col-6 col-md-3">
+                <div class="software-badge p-3 rounded-3 bg-light border text-center h-100">
+                    <i class="bi bi-box me-2 text-primary"></i>SolidWorks
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="software-badge p-3 rounded-3 bg-light border text-center h-100">
+                    <i class="bi bi-pencil-square me-2 text-danger"></i>AutoCAD
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="software-badge p-3 rounded-3 bg-light border text-center h-100">
+                    <i class="bi bi-brush me-2 text-success"></i>Photoshop
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="software-badge p-3 rounded-3 bg-light border text-center h-100 text-muted">
+                    <i class="bi bi-stars me-2 text-warning"></i>{{ _t('shop.otros') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-white" id="reviews">
+    <div class="container">
+        <div class="text-center mb-5 reveal">
+            <h2 class="section-title fw-bold mb-2 d-inline-block"><i class="bi bi-star-fill text-warning me-2"></i>{{ _t('reviews.title') }}</h2>
+            <p class="text-muted mt-3 mb-0">{{ _t('reviews.subtitle') }}</p>
+            {% if reviews %}
+                <div class="d-flex align-items-center justify-content-center gap-2 mt-3">
+                    <span class="review-stars review-stars-lg">{{ avg_rating }}</span>
+                    <span class="text-muted small">({{ review_count }} {{ _t('reviews.count') }})</span>
+                </div>
+            {% endif %}
+        </div>
+        <div class="row justify-content-center g-4">
+            <div class="col-lg-8">
+                {% if current_user and current_user.role != 'admin' %}
+                    <div class="card bg-light border-0 mb-4">
+                        <div class="card-body p-3">
+                            <h3 class="h6 fw-bold mb-2">{{ _t('reviews.leave') }}</h3>
+                            <form method="post" action="/review" id="reviewForm">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="small text-muted">{{ _t('reviews.rating') }}:</span>
+                                    <div class="star-input" id="star-input" role="radiogroup" aria-label="{{ _t('reviews.rating') }}">
+                                        {% for i in range(1, 6) %}
+                                            <i class="bi bi-star star-option" data-value="{{ i }}" role="radio" tabindex="0" aria-checked="false" aria-label="{{ i }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                    <input type="hidden" name="rating" id="rating" value="5">
+                                </div>
+                                <textarea name="comment" class="form-control mb-2" rows="3"
+                                          placeholder="{{ _t('reviews.placeholder') }}"></textarea>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-send me-1"></i>{{ _t('reviews.submit') }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if reviews %}
+                    <div class="review-widget" id="review-widget" data-total="{{ reviews|length }}">
+                        <div class="review-slides">
+                            {% for r in reviews %}
+                                <div class="review-slide px-1 text-center" {% if not loop.first %}hidden{% endif %}>
+                                    <div class="review-stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="bi {% if i <= r.rating %}bi-star-fill text-warning{% else %}bi-star text-muted{% endif %}"></i>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="mb-2 mt-3">{{ r.comment if r.comment else '—' }}</p>
+                                    <div class="d-flex align-items-center justify-content-center gap-2 text-muted small">
+                                        <i class="bi bi-person-circle fs-5"></i>
+                                        <span class="fw-semibold text-dark">{{ r.name }}</span>
+                                        <span>·</span>
+                                        <span>{{ r.created_at.strftime('%d/%m/%Y') }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if reviews|length > 1 %}
+                            <div class="d-flex align-items-center justify-content-between mt-4">
+                                <button type="button" class="btn btn-sm btn-outline-secondary review-prev">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <span class="small text-muted review-counter" id="review-counter">1 / {{ reviews|length }}</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary review-next">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-3">
+                        <i class="bi bi-star me-1"></i>{{ _t('reviews.none') }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

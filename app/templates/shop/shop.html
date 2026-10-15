@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('shop.title') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h1 class="fw-bold mb-2">{{ _t('shop.title') }}</h1>
+        <p class="lead text-muted">{{ _t('shop.subtitle') }}</p>
+    </div>
+
+    <form method="get" action="/shop" class="row g-2 mb-4 align-items-end">
+        <div class="col-12 col-md-4">
+            <label class="form-label small fw-semibold text-muted mb-1">{{ _t('shop.search') }}</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="{{ search }}" class="form-control"
+                       placeholder="{{ _t('shop.search_ph') }}">
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label small fw-semibold text-muted mb-1">{{ _t('shop.category') }}</label>
+            <select name="category" class="form-select" onchange="this.form.submit()">
+                <option value="" {% if selected_category == '' %}selected{% endif %}>{{ _t('shop.all') }}</option>
+                <option value="solidworks" {% if selected_category == 'solidworks' %}selected{% endif %}>{{ _t('shop.solidworks') }}</option>
+                <option value="autocad" {% if selected_category == 'autocad' %}selected{% endif %}>{{ _t('shop.autocad') }}</option>
+                <option value="otros" {% if selected_category == 'otros' %}selected{% endif %}>{{ _t('shop.otros') }}</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label small fw-semibold text-muted mb-1">{{ _t('shop.software') }}</label>
+            <select name="software" class="form-select" onchange="this.form.submit()">
+                <option value="" {% if selected_software == '' %}selected{% endif %}>{{ _t('shop.all') }}</option>
+                {% for sw in software_list %}
+                    <option value="{{ sw }}" {% if selected_software == sw %}selected{% endif %}>{{ sw }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label small fw-semibold text-muted mb-1">{{ _t('shop.sort') }}</label>
+            <select name="sort" class="form-select" onchange="this.form.submit()">
+                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>{{ _t('shop.sort_newest') }}</option>
+                <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>{{ _t('shop.sort_oldest') }}</option>
+                <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>{{ _t('shop.sort_price_asc') }}</option>
+                <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>{{ _t('shop.sort_price_desc') }}</option>
+                <option value="name_asc" {% if sort == 'name_asc' %}selected{% endif %}>{{ _t('shop.sort_name') }}</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>{{ _t('shop.search_btn') }}</button>
+        </div>
+    </form>
+
+    {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+                <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay: {{ (loop.index0 % 3) * 0.06 }}s">
+                    <div class="card h-100 product-card shadow-sm border-0">
+                        <a href="/product/{{ product.id }}" class="product-thumb-wrap d-block">
+                            {% set thumb = product.image_path or (product.gallery[0].image_path if product.gallery else None) %}
+                            {% if thumb %}
+                                <img src="/uploads/{{ thumb.split('/')[-1].split('\\')[-1] }}"
+                                     alt="{{ product.name }}" class="product-thumb" loading="lazy">
+                            {% else %}
+                                <div class="product-thumb d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-file-earmark-cad" style="font-size: 4rem; color: #cbd5e1;"></i>
+                                </div>
+                            {% endif %}
+                        </a>
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge text-bg-{{ 'primary' if product.category == 'solidworks' else 'danger' if product.category == 'autocad' else 'success' }}">
+                                    {{ product.category }}
+                                </span>
+                                {% if product.software %}
+                                    <small class="text-muted"><i class="bi bi-gear me-1"></i>{{ product.software }}</small>
+                                {% endif %}
+                            </div>
+                            <h5 class="card-title fw-bold mb-2">{{ product.name }}</h5>
+                            <p class="card-text text-muted small flex-grow-1">{{ (product.description or '')[:110] }}{% if product.description and product.description|length > 110 %}...{% endif %}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="fs-4 fw-bold text-primary">{{ product.price }} {{ _t('common.currency') }}</span>
+                            </div>
+                            <div class="d-flex gap-2 mt-3">
+                                <a href="/product/{{ product.id }}" class="btn btn-outline-primary btn-sm flex-grow-1">
+                                    <i class="bi bi-eye me-1"></i>{{ _t('product.back') }}
+                                </a>
+                                {% if current_user and current_user.role != 'admin' %}
+                                    <form method="post" action="/shop/cart/add/{{ product.id }}" class="flex-grow-1">
+                                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                                            <i class="bi bi-cart-plus me-1"></i>{{ _t('cart.add_btn') }}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="empty-state-icon mx-auto mb-3">
+                <i class="bi bi-search"></i>
+            </div>
+            <p class="lead fw-semibold mb-1">{{ _t('shop.empty') }}</p>
+            <p class="text-muted mb-4">{{ _t('shop.empty_hint') }}</p>
+            <a href="/shop" class="btn btn-outline-primary"><i class="bi bi-arrow-counterclockwise me-1"></i>{{ _t('shop.clear_filters') }}</a>
+        </div>
+    {% endif %}
+
+    {% include "partials/pagination.html" %}
+</div>
+{% endblock %}

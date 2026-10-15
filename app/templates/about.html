@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('about.title') }}{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold mb-2">{{ _t('about.title') }}</h1>
+            <div class="divider mx-auto"></div>
+        </div>
+        <div class="row g-5">
+            <div class="col-lg-8 mx-auto">
+                <p class="lead">{{ _t('about.p1') }}</p>
+                <p class="text-muted">{{ _t('about.p2') }}</p>
+                <p class="text-muted">{{ _t('about.p3') }}</p>
+            </div>
+        </div>
+
+        <h2 class="text-center fw-bold mt-5 mb-4">{{ _t('about.values_title') }}</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4 feature-card">
+                    <span class="value-icon d-inline-flex align-items-center justify-content-center mx-auto mb-3">
+                        <i class="bi bi-bullseye"></i>
+                    </span>
+                    <h5 class="fw-bold">{{ _t('about.value1_title') }}</h5>
+                    <p class="text-muted small mb-0">{{ _t('about.value1_desc') }}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4 feature-card">
+                    <span class="value-icon d-inline-flex align-items-center justify-content-center mx-auto mb-3">
+                        <i class="bi bi-lightbulb"></i>
+                    </span>
+                    <h5 class="fw-bold">{{ _t('about.value2_title') }}</h5>
+                    <p class="text-muted small mb-0">{{ _t('about.value2_desc') }}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4 feature-card">
+                    <span class="value-icon d-inline-flex align-items-center justify-content-center mx-auto mb-3">
+                        <i class="bi bi-hand-thumbs-up"></i>
+                    </span>
+                    <h5 class="fw-bold">{{ _t('about.value3_title') }}</h5>
+                    <p class="text-muted small mb-0">{{ _t('about.value3_desc') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

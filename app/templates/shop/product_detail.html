@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block meta_description %}{{ product.description or product.name }}{% endblock %}
+{% block og_title %}{{ product.name }} - {{ _t('app_name') }}{% endblock %}
+{% block og_description %}{{ product.description or product.name }}{% endblock %}
+{% block og_image %}{% if product.image_path %}/uploads/{{ product.image_path }}{% else %}{{ url_for('static', path='/img/logoGHSinFondoBlanco.png') }}{% endif %}{% endblock %}
+{% block extra_head %}{% if product.image_path %}<link rel="preload" as="image" href="/uploads/{{ product.image_path }}">{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <a href="/shop" class="btn btn-outline-secondary mb-4"><i class="bi bi-arrow-left me-1"></i>{{ _t('product.back') }}</a>
+
+    <div class="row g-5">
+        <div class="col-lg-5">
+            {% set gallery_imgs = [] %}
+            {% if product.image_path %}{% set _ = gallery_imgs.append(product.image_path) %}{% endif %}
+            {% for gi in product.gallery %}{% set _ = gallery_imgs.append(gi.image_path) %}{% endfor %}
+
+            <div class="bg-light rounded-4 overflow-hidden shadow-sm product-gallery">
+                {% if gallery_imgs %}
+                    <button type="button" class="gallery-zoom" id="gallery-zoom-btn" aria-label="{{ _t('product.zoom') }}">
+                        <i class="bi bi-zoom-in"></i>
+                    </button>
+                    <img id="gallery-main" src="/uploads/{{ gallery_imgs[0].split('/')[-1].split('\\')[-1] }}"
+                         alt="{{ product.name }}" class="img-fluid gallery-main" loading="lazy">
+                {% else %}
+                    <div class="d-flex align-items-center justify-content-center p-5">
+                        <i class="bi bi-file-earmark-cad" style="font-size: 10rem; color: #cbd5e1;"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if gallery_imgs|length > 1 %}
+                <div class="gallery-thumbs d-flex gap-2 mt-2 flex-wrap">
+                    {% for path in gallery_imgs %}
+                        <img src="/uploads/{{ path.split('/')[-1].split('\\')[-1] }}" alt="{{ product.name }}"
+                             class="gallery-thumb {% if loop.first %}active{% endif %}"
+                             data-src="{{ path.split('/')[-1].split('\\')[-1] }}"
+                             role="button" tabindex="0">
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div id="lightbox" class="lightbox" aria-hidden="true">
+                <button type="button" class="lightbox-close" id="lightbox-close" aria-label="{{ _t('product.close') }}">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <img id="lightbox-img" src="" alt="{{ product.name }}">
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <span class="badge text-bg-{{ 'primary' if product.category == 'solidworks' else 'danger' if product.category == 'autocad' else 'success' }} mb-2">
+                <i class="bi bi-tag me-1"></i>{{ product.category }}
+            </span>
+            <h1 class="fw-bold mb-3">{{ product.name }}</h1>
+            <p class="lead text-muted">{{ product.description }}</p>
+
+            <div class="row g-3 mt-2">
+                <div class="col-sm-6">
+                    <div class="bg-white border rounded-3 p-3 shadow-sm">
+                        <small class="text-muted d-block"><i class="bi bi-currency-euro me-1"></i>{{ _t('shop.price') }}</small>
+                        <strong class="fs-4">{{ product.price }} {{ _t('common.currency') }}</strong>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="bg-white border rounded-3 p-3 shadow-sm">
+                        <small class="text-muted d-block"><i class="bi bi-gear me-1"></i>{{ _t('product.software') }}</small>
+                        <strong>{{ product.software or '—' }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between mt-4">
+                <span class="display-6 fw-bold text-primary">{{ product.price }} {{ _t('common.currency') }}</span>
+                {% if product.is_available %}
+                    <span class="badge text-bg-success"><i class="bi bi-check-circle me-1"></i>{{ _t('product.in_stock') }}</span>
+                {% else %}
+                    <span class="badge text-bg-danger">{{ _t('product.not_available') }}</span>
+                {% endif %}
+            </div>
+
+            <div class="mt-4">
+                {% if product.is_available %}
+                    {% if current_user and current_user.role == 'admin' %}
+                        <div class="alert alert-secondary d-flex align-items-center gap-2 mb-0">
+                            <i class="bi bi-person-badge"></i>
+                            <span>{{ _t('shop.admin_buy_blocked') }}</span>
+                        </div>
+                    {% elif current_user %}
+                        <form method="post" action="/shop/cart/add/{{ product.id }}">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-cart-plus me-2"></i>{{ _t('cart.add_btn') }}
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="/auth/login" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>{{ _t('shop.login_to_buy') }}
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <button class="btn btn-secondary btn-lg w-100" disabled>{{ _t('product.not_available') }}</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

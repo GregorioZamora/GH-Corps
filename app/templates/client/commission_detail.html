@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}{{ commission.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <a href="/account/commissions" class="small text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i>{{ _t('commission.back_to_list') }}
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                <div>
+                    <h1 class="h3 fw-bold mb-1">{{ commission.title }}</h1>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-calendar3 me-1"></i>{{ commission.created_at.strftime('%d/%m/%Y') }}
+                    </p>
+                </div>
+                <span class="badge {% if commission.status == 'completado' %}text-bg-success{% elif commission.status == 'revision' %}text-bg-info{% else %}text-bg-primary{% endif %}">
+                    {{ _t('commission.status_' ~ commission.status) }}
+                </span>
+            </div>
+            {% if commission.description %}
+                <hr>
+                <p class="mb-0">{{ commission.description }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mb-4">
+        {% for msg in thread %}
+            <div class="d-flex mb-3 {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
+                <div class="{% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light border{% endif %} rounded-3 px-3 py-2 chat-bubble">
+                    <small class="fw-semibold d-block {% if msg.sender_id == current_user.id %}text-white-50{% else %}text-muted{% endif %}">
+                        {% if msg.sender_id == current_user.id %}
+                            {{ _t('commission.you') }}
+                        {% else %}
+                            {{ settings.COMPANY_NAME }}
+                        {% endif %}
+                        · {{ msg.created_at.strftime('%d/%m/%Y %H:%M') }}
+                    </small>
+                    {% if msg.content %}<div class="mt-1">{{ msg.content }}</div>{% endif %}
+                    {% if msg.attachment_path %}
+                        <div class="mt-2">
+                            <a href="/uploads/{{ msg.attachment_path.split('/')[-1].split('\\')[-1] }}" target="_blank"
+                               class="{% if msg.sender_id == current_user.id %}btn btn-sm btn-light{% else %}btn btn-sm btn-outline-primary{% endif %}">
+                                <i class="bi bi-paperclip me-1"></i>{{ _t('commission.download_attachment') }}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if commission.status != 'completado' %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">{{ _t('commission.reply_title') }}</h5>
+                <form method="post" action="/account/commissions/{{ commission.id }}/messages" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <textarea class="form-control" id="content" name="content" rows="4"
+                                  placeholder="{{ _t('commission.reply_placeholder') }}"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="attachment" class="form-label small text-muted">{{ _t('commission.attach_label') }}</label>
+                        <input type="file" class="form-control" id="attachment" name="attachment">
+                    </div>
+                    <button type="submit" class="btn btn-primary">{{ _t('commission.reply_btn') }}</button>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ _t('commission.completed_note') }}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

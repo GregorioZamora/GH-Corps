@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+.pytest_cache/
+
+# Environment
+.env
+.secret_key
+
+# Database
+*.db
+
+# Uploads
+app/uploads/*
+!app/uploads/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store

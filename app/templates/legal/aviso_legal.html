@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('legal.aviso_title') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 fw-bold mb-4">{{ _t('legal.aviso_title') }}</h1>
+
+                    <h5 class="fw-bold mt-4">{{ _t('legal.owner') }}</h5>
+                    <p>{{ _t('legal.owner_body', name=settings.COMPANY_NAME, email=settings.COMPANY_EMAIL) }}</p>
+
+                    <h5 class="fw-bold mt-4">{{ _t('legal.purpose') }}</h5>
+                    <p>{{ _t('legal.purpose_body') }}</p>
+
+                    <h5 class="fw-bold mt-4">{{ _t('legal.intellectual') }}</h5>
+                    <p>{{ _t('legal.intellectual_body', name=settings.COMPANY_NAME) }}</p>
+
+                    <h5 class="fw-bold mt-4">{{ _t('legal.limitation') }}</h5>
+                    <p>{{ _t('legal.limitation_body') }}</p>
+
+                    <h5 class="fw-bold mt-4">{{ _t('legal.applicable') }}</h5>
+                    <p>{{ _t('legal.applicable_body') }}</p>
+
+                    <p class="text-muted small mt-4">{{ _t('legal.updated_at') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

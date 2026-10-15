@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}{{ _t('tagline') }}{% endblock %}">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="{{ _t('app_name') }}">
+    <link rel="canonical" href="{{ request.url.scheme }}://{{ request.url.netloc }}/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ _t('app_name') }}">
+    <meta property="og:title" content="{% block og_title %}{{ _t('app_name') }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ _t('tagline') }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ url_for('static', path='/img/logoGHSinFondoBlanco.png') }}{% endblock %}">
+    <meta name="theme-color" content="#212529">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "{{ _t('app_name') }}",
+        "url": "{{ request.url.scheme }}://{{ request.url.netloc }}/",
+        "logo": "{{ request.url.scheme }}://{{ request.url.netloc }}/static/img/logoGHSinFondoBlanco.png",
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "{{ settings.COMPANY_EMAIL }}",
+            "contactType": "customer support"
+        }
+    }
+    </script>
+    {% block extra_head %}{% endblock %}
+    <title>{% block title %}{{ _t('app_name') }}{% endblock %} - {{ _t('app_name') }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/style.css') }}?v=7" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', path='/img/logoGHSinFondoBlanco.png') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="d-flex flex-column min-vh-100{% block body_class %}{% endblock %}">
+
+    <a class="skip-link" href="#main-content">{{ _t('common.skip_to_content') }}</a>
+
+    {% set current_user = current_user | default(none) %}
+    {% set is_admin = current_user is not none and current_user.role == 'admin' %}
+    {% set is_client = current_user is not none and current_user.role == 'client' %}
+    {% set path = request.url.path if request else '' %}
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+                <img src="{{ url_for('static', path='/img/logoGHSinFondoBlanco.png') }}" alt="{{ _t('app_name') }}" class="brand-logo">
+                <span>{{ _t('app_name') }}</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+                    aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if path == '/' else '' }}" href="/"
+                           {% if path == '/' %}aria-current="page"{% endif %}><i class="bi bi-house-door me-1"></i>{{ _t('nav.home') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if path == '/shop' or path.startswith('/product/') else '' }}" href="/shop"
+                           {% if path == '/shop' or path.startswith('/product/') %}aria-current="page"{% endif %}><i class="bi bi-shop me-1"></i>{{ _t('nav.shop') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if path == '/about' else '' }}" href="/about"
+                           {% if path == '/about' %}aria-current="page"{% endif %}><i class="bi bi-info-circle me-1"></i>{{ _t('nav.about') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if path == '/contact' else '' }}" href="/contact"
+                           {% if path == '/contact' %}aria-current="page"{% endif %}><i class="bi bi-envelope me-1"></i>{{ _t('nav.contact') }}</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav d-flex align-items-lg-center gap-lg-2 gap-md-1 mt-3 mt-lg-0 flex-row flex-wrap">
+                    {% if current_user %}
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-outline-light position-relative" href="/cart"
+                           aria-label="{{ _t('nav.cart') }}" title="{{ _t('nav.cart') }}">
+                            <i class="bi bi-cart3"></i>
+                            {% if request.state.cart_count and request.state.cart_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger cart-badge">
+                                    {{ request.state.cart_count }}
+                                </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown">
+                        <button class="btn btn-sm btn-outline-light dropdown-toggle d-flex align-items-center"
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                aria-label="{{ _t('nav.language') }}" title="{{ _t('nav.language') }}">
+                            <span class="flag-emoji">
+                                {% if lang == 'es' %}🇪🇸{% elif lang == 'en' %}🇬🇧{% elif lang == 'fr' %}🇫🇷{% endif %}
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><span class="dropdown-header small text-muted text-uppercase">{{ _t('nav.language') }}</span></li>
+                            <li><a class="dropdown-item {{ 'active' if lang == 'es' }}" href="/language/es">🇪🇸 Español</a></li>
+                            <li><a class="dropdown-item {{ 'active' if lang == 'en' }}" href="/language/en">🇬🇧 English</a></li>
+                            <li><a class="dropdown-item {{ 'active' if lang == 'fr' }}" href="/language/fr">🇫🇷 Français</a></li>
+                        </ul>
+                    </li>
+                    {% if current_user %}
+                        <li class="nav-item">
+                            <a class="btn btn-sm btn-outline-light position-relative" href="/notifications"
+                               aria-label="{{ _t('nav.notifications') }}" title="{{ _t('nav.notifications') }}">
+                                <i class="bi bi-bell"></i>
+                                <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger notif-badge d-none">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <button class="btn btn-sm btn-outline-light dropdown-toggle d-flex align-items-center gap-1"
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle fs-6"></i>
+                                <span class="small fw-semibold d-none d-md-inline">{{ current_user.full_name }}</span>
+                                {% if is_admin %}<span class="badge text-bg-warning d-none d-lg-inline">Admin</span>{% endif %}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: 220px;">
+                                <li class="px-3 py-2">
+                                    <div class="fw-semibold small text-break">{{ current_user.full_name }}</div>
+                                    <div class="text-muted small">
+                                        {% if is_admin %}{{ _t('nav.admin_panel') }}{% else %}{{ _t('nav.my_account') }}{% endif %}
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/notifications"><i class="bi bi-bell me-2"></i>{{ _t('nav.notifications') }}</a></li>
+                                {% if is_admin %}
+                                    <li><a class="dropdown-item" href="/admin"><i class="bi bi-speedometer2 me-2"></i>{{ _t('nav.admin_panel') }}</a></li>
+                                    <li><a class="dropdown-item" href="/admin/orders"><i class="bi bi-bag me-2"></i>{{ _t('nav.my_orders') }}</a></li>
+                                    <li><a class="dropdown-item" href="/admin/messages"><i class="bi bi-chat-dots me-2"></i>{{ _t('nav.my_messages') }}</a></li>
+                                    <li><a class="dropdown-item" href="/admin/commissions"><i class="bi bi-pencil-square me-2"></i>{{ _t('nav.my_commissions') }}</a></li>
+                                    <li><a class="dropdown-item" href="/admin/reviews"><i class="bi bi-star-fill text-warning me-2"></i>{{ _t('nav.admin_reviews') }}</a></li>
+                                {% else %}
+                                    <li><a class="dropdown-item" href="/account"><i class="bi bi-grid me-2"></i>{{ _t('nav.my_account') }}</a></li>
+                                    <li><a class="dropdown-item" href="/account/orders"><i class="bi bi-bag me-2"></i>{{ _t('nav.my_orders') }}</a></li>
+                                    <li><a class="dropdown-item" href="/account/commissions"><i class="bi bi-pencil-square me-2"></i>{{ _t('nav.my_commissions') }}</a></li>
+                                    <li><a class="dropdown-item" href="/account/messages"><i class="bi bi-chat-dots me-2"></i>{{ _t('nav.my_messages') }}</a></li>
+                                    <li><a class="dropdown-item" href="/account/review"><i class="bi bi-star-fill text-warning me-2"></i>{{ _t('nav.my_review') }}</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>{{ _t('nav.logout') }}</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item"><a class="btn btn-sm btn-outline-light" href="/auth/login">{{ _t('nav.login') }}</a></li>
+                        <li class="nav-item"><a class="btn btn-sm btn-primary ms-lg-1" href="/auth/register">{{ _t('nav.register') }}</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1" id="main-content" tabindex="-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer bg-dark text-light mt-auto">
+        <div class="container py-5">
+            <div class="row g-4">
+                <div class="col-md-5">
+                    <h5 class="fw-bold d-flex align-items-center gap-2"><img src="{{ url_for('static', path='/img/logoGHSinFondoBlanco.png') }}" alt="{{ _t('app_name') }}" class="brand-logo footer-logo">{{ _t('app_name') }}</h5>
+                    <p class="mb-2 small opacity-75">{{ _t('tagline') }}</p>
+                    <p class="small text-secondary mb-0">© {{ '2023'|int + 3 }} {{ _t('app_name') }}. {{ _t('footer.rights') }}</p>
+                </div>
+                <div class="col-6 col-md-4">
+                    <h6 class="fw-bold text-uppercase small mb-3">{{ _t('footer.links') }}</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-1">
+                        <li><a href="/" class="link-light text-decoration-none"><i class="bi bi-chevron-right small me-1 opacity-50"></i>{{ _t('nav.home') }}</a></li>
+                        <li><a href="/shop" class="link-light text-decoration-none"><i class="bi bi-chevron-right small me-1 opacity-50"></i>{{ _t('nav.shop') }}</a></li>
+                        <li><a href="/about" class="link-light text-decoration-none"><i class="bi bi-chevron-right small me-1 opacity-50"></i>{{ _t('nav.about') }}</a></li>
+                        <li><a href="/contact" class="link-light text-decoration-none"><i class="bi bi-chevron-right small me-1 opacity-50"></i>{{ _t('nav.contact') }}</a></li>
+                        <li class="mt-3">
+                            <a href="/legal/aviso-legal" class="link-secondary text-decoration-none">{{ _t('legal.aviso_title') }}</a>
+                            <span class="text-secondary mx-1">·</span>
+                            <a href="/legal/privacidad" class="link-secondary text-decoration-none">{{ _t('legal.privacy_title') }}</a>
+                            <span class="text-secondary mx-1">·</span>
+                            <a href="/legal/cookies" class="link-secondary text-decoration-none">{{ _t('legal.cookies_title') }}</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h6 class="fw-bold text-uppercase small mb-3">{{ _t('contact.info_title') }}</h6>
+                    <ul class="list-unstyled small text-white d-flex flex-column gap-2">
+                        <li><i class="bi bi-envelope me-2"></i>{{ _t('contact.info_email') }}</li>
+                        <li><i class="bi bi-clock me-2"></i>{{ _t('contact.info_hours') }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {% if not request.cookies.get('cookie_consent') %}
+        <div id="cookie-banner" class="cookie-banner" role="dialog" aria-label="{{ _t('legal.cookie_banner_title') }}">
+            <div class="cookie-banner-body">
+                <p class="mb-2">{{ _t('legal.cookie_banner_text') }}</p>
+                <a href="/legal/cookies" class="small link-light text-decoration-underline">{{ _t('legal.cookies_title') }}</a>
+            </div>
+            <div class="cookie-banner-actions">
+                <button type="button" class="btn btn-sm btn-outline-light" data-cookie-action="reject">{{ _t('legal.cookie_reject') }}</button>
+                <button type="button" class="btn btn-sm btn-primary" data-cookie-action="accept">{{ _t('legal.cookie_accept') }}</button>
+            </div>
+        </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', path='/js/main.js') }}?v=7"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('contact.title') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold mb-2">{{ _t('contact.title') }}</h1>
+        <p class="lead text-muted">{{ _t('contact.subtitle') }}</p>
+    </div>
+
+    {% if request.query_params.get('sent') %}
+        <div class="alert alert-success alert-dismissible d-flex align-items-center justify-content-center fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div>{{ _t('contact.success') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ _t('common.close') }}"></button>
+        </div>
+    {% elif request.query_params.get('sent_commission') %}
+        <div class="alert alert-success alert-dismissible d-flex align-items-center justify-content-center fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div>{{ _t('contact.success_commission') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ _t('common.close') }}"></button>
+        </div>
+    {% elif request.query_params.get('error') %}
+        <div class="alert alert-danger alert-dismissible d-flex align-items-center justify-content-center fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>{{ _t('contact.error_guest') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ _t('common.close') }}"></button>
+        </div>
+    {% endif %}
+
+    <div class="row g-5">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="h4 fw-bold mb-4">{{ _t('contact.title') }}</h2>
+                    {% if user %}
+                        <div class="alert alert-light border d-flex align-items-center gap-2 small mb-4">
+                            <i class="bi bi-person-check"></i>
+                            <span>{{ _t('contact.sending_as') }} <strong>{{ user.full_name }}</strong> ({{ user.email }})</span>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info border d-flex align-items-center gap-2 small mb-4">
+                            <i class="bi bi-info-circle"></i>
+                            <span>{{ _t('contact.guest_hint') }}</span>
+                        </div>
+                    {% endif %}
+                    <form method="post" action="/contact" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            {% if not user %}
+                                <div class="col-12 col-md-6">
+                                    <label for="name" class="form-label fw-semibold">{{ _t('contact.name_label') }}</label>
+                                    <input type="text" class="form-control" id="name" name="name" required
+                                           maxlength="255" autocomplete="name">
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="email" class="form-label fw-semibold">{{ _t('contact.email_label') }}</label>
+                                    <input type="email" class="form-control" id="email" name="email" required
+                                           maxlength="255" autocomplete="email">
+                                </div>
+                            {% endif %}
+                            <div class="col-12">
+                                <label for="kind" class="form-label fw-semibold">{{ _t('contact.kind_label') }}</label>
+                                <select class="form-select" id="kind" name="kind" {% if not user %}disabled{% endif %}>
+                                    <option value="message">{{ _t('contact.kind_message') }}</option>
+                                    {% if user and user.role != 'admin' %}
+                                        <option value="commission">{{ _t('contact.kind_commission') }}</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-12" id="commission-hint">
+                                <div class="alert alert-info py-2 mb-0 small d-flex align-items-center gap-2">
+                                    <i class="bi bi-info-circle"></i><span>{{ _t('contact.commission_hint') }}</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="subject" class="form-label fw-semibold">{{ _t('contact.subject_label') }}</label>
+                                <input type="text" class="form-control" id="subject" name="subject"
+                                       value="{{ request.query_params.get('to', '') }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="message" class="form-label fw-semibold">{{ _t('contact.message_label') }}</label>
+                                <textarea class="form-control" id="message" name="message" rows="6" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="files" class="form-label fw-semibold">{{ _t('contact.attach_images') }}</label>
+                                <input type="file" class="form-control" id="files" name="files" multiple accept="image/*">
+                                <div class="form-text">{{ _t('contact.attach_hint') }}</div>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-send me-2"></i>{{ _t('contact.submit') }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100 bg-light">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="h4 fw-bold mb-4">{{ _t('contact.info_title') }}</h2>
+                    <ul class="list-unstyled d-flex flex-column gap-4 mb-0">
+                        <li class="d-flex align-items-start gap-3">
+                            <span class="contact-icon d-inline-flex align-items-center justify-content-center">
+                                <i class="bi bi-envelope-fill"></i>
+                            </span>
+                            <div>
+                                <strong class="d-block">{{ _t('contact.email_label') }}</strong>
+                                <span class="text-muted">{{ _t('contact.info_email') }}</span>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-start gap-3">
+                            <span class="contact-icon d-inline-flex align-items-center justify-content-center">
+                                <i class="bi bi-clock-fill"></i>
+                            </span>
+                            <div>
+                                <strong class="d-block">{{ _t('contact.hours_label') }}</strong>
+                                <span class="text-muted">{{ _t('contact.info_hours') }}</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var kind = document.getElementById('kind');
+        var hint = document.getElementById('commission-hint');
+        function toggle() { hint.style.display = kind.value === 'commission' ? '' : 'none'; }
+        kind.addEventListener('change', toggle);
+        toggle();
+    });
+</script>
+{% endblock %}

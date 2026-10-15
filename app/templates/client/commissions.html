@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('client.my_commissions') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">{{ _t('client.my_commissions') }}</h1>
+            <p class="text-muted mb-0">{{ _t('client.commissions_desc') }}</p>
+        </div>
+        <a href="/account/commissions/new" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>{{ _t('commission.new_title') }}
+        </a>
+    </div>
+
+    {% if commissions %}
+        <div class="row g-4">
+            {% for c in commissions %}
+                <div class="col-md-6 col-lg-4">
+                    <a href="/account/commissions/{{ c.id }}" class="card h-100 border-0 shadow-sm text-decoration-none commission-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="fw-bold text-dark mb-0">{{ c.title }}</h5>
+                                <span class="badge {% if c.status == 'completado' %}text-bg-success{% elif c.status == 'revision' %}text-bg-info{% else %}text-bg-primary{% endif %}">
+                                    {{ _t('commission.status_' ~ c.status) }}
+                                </span>
+                            </div>
+                            <p class="text-muted small mb-3 text-truncate">{{ c.description or '' }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ c.updated_at.strftime('%d/%m/%Y') }}</small>
+                                <small class="text-primary fw-semibold">{{ _t('client.view') }} <i class="bi bi-arrow-right"></i></small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <span class="dashboard-icon d-inline-flex align-items-center justify-content-center mb-3">
+                <i class="bi bi-tools fs-3"></i>
+            </span>
+            <p class="text-muted">{{ _t('commission.no_commissions') }}</p>
+            <a href="/account/commissions/new" class="btn btn-outline-primary">{{ _t('commission.request_title') }}</a>
+        </div>
+    {% endif %}
+
+    {% include "partials/pagination.html" %}
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('admin.order_detail') }} #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <a href="/admin/orders" class="btn btn-outline-secondary btn-sm mb-4">{{ _t('admin.back_to_orders') }}</a>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-bag-check me-2 text-primary"></i>{{ _t('admin.order_detail') }} #{{ order.id }}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1">{{ _t('client.order_date') }}</p>
+                            <p class="fw-semibold mb-0">{{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1">{{ _t('client.status') }}</p>
+                            <span class="badge text-bg-{{ 'success' if order.status == 'completado' else 'warning' if order.status == 'pendiente' else 'primary' if order.status == 'pagado' else 'info' if order.status == 'enviado' else 'secondary' }}">
+                                {{ order.status }}
+                            </span>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1">{{ _t('client.quantity') }}</p>
+                            <p class="fw-semibold mb-0">{{ order.quantity }}</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1">{{ _t('client.total') }}</p>
+                            <p class="fw-bold text-primary fs-5 mb-0">{{ '%.2f'|format(order.total_price) }} €</p>
+                        </div>
+                    </div>
+
+                    {% if order.notes %}
+                        <hr class="my-3">
+                        <p class="text-muted small mb-1">{{ _t('admin.order_notes') }}</p>
+                        <p class="border-start border-primary ps-3 mb-0">{{ order.notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if product %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-box me-2 text-primary"></i>{{ product.name }}</h6>
+                        <div class="row g-2 text-muted small">
+                            <div class="col-sm-4"><strong>{{ _t('admin.product_category') }}:</strong> {{ product.category }}</div>
+                            <div class="col-sm-4"><strong>{{ _t('admin.product_software') }}:</strong> {{ product.software or '—' }}</div>
+                            <div class="col-sm-4"><strong>{{ _t('admin.product_price') }}:</strong> {{ product.price }} €</div>
+                        </div>
+                        {% if product.description %}
+                            <p class="text-muted small mt-2 mb-0">{{ product.description }}</p>
+                        {% endif %}
+                        {% if product.file_path %}
+                            <a href="/uploads/{{ product.file_path.split('/')[-1].split('\\\\')[-1] }}" class="btn btn-sm btn-outline-primary mt-3" download>
+                                <i class="bi bi-download me-1"></i>{{ _t('admin.download_file') }}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-person me-2 text-primary"></i>{{ _t('admin.customer_info') }}</h6>
+                    {% if customer %}
+                        <p class="mb-2"><strong>{{ customer.full_name }}</strong></p>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-envelope me-1"></i>{{ customer.email }}
+                        </p>
+                        {% if customer.phone %}
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-telephone me-1"></i>{{ customer.phone }}
+                            </p>
+                        {% endif %}
+                        {% if customer.address %}
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-geo-alt me-1"></i>{{ customer.address }}
+                            </p>
+                        {% endif %}
+                        {% if customer.gender %}
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-person-lines-fill me-1"></i>{{ customer.gender }}
+                            </p>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted mb-0">—</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-arrow-repeat me-2 text-primary"></i>{{ _t('admin.update_status') }}</h6>
+                    <form method="post" action="/admin/orders/{{ order.id }}/status" class="d-flex gap-2">
+                        <select name="status_value" class="form-select form-select-sm flex-grow-1">
+                            {% for s in ['pendiente', 'pagado', 'enviado', 'completado', 'cancelado'] %}
+                                <option value="{{ s }}" {{ 'selected' if order.status == s }}>
+                                    {{ _t('admin.status_' ~ s) }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

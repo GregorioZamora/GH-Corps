@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('commission.request_title') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 fw-bold mb-2">{{ _t('commission.request_title') }}</h1>
+                    <p class="text-muted mb-4">{{ _t('commission.form_desc') }}</p>
+
+                    {% if sent %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>{{ _t('commission.request_sent') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ _t('common.close') }}"></button>
+                        </div>
+                        <a href="/account/commissions" class="btn btn-outline-primary">{{ _t('client.my_commissions') }}</a>
+                    {% else %}
+                        <form method="post" action="/account/commissions" class="needs-validation">
+                            {% if error %}
+                                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <div>{{ error }}</div>
+                                </div>
+                            {% endif %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="contact_name" class="form-label fw-semibold">{{ _t('commission.contact_name_label') }}</label>
+                                        <input type="text" class="form-control" id="contact_name" name="contact_name" required
+                                               value="{{ contact_name|default('') }}"
+                                               placeholder="{{ _t('commission.contact_name_placeholder') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="contact_email" class="form-label fw-semibold">{{ _t('commission.contact_email_label') }}</label>
+                                        <input type="email" class="form-control" id="contact_email" name="contact_email" required
+                                               value="{{ contact_email|default('') }}"
+                                               placeholder="{{ _t('commission.contact_email_placeholder') }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="title" class="form-label fw-semibold">{{ _t('commission.title_label') }}</label>
+                                <input type="text" class="form-control" id="title" name="title" required
+                                       value="{{ title|default('') }}"
+                                       placeholder="{{ _t('commission.title_placeholder') }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label fw-semibold">{{ _t('commission.description_label') }}</label>
+                                <textarea class="form-control" id="description" name="description" rows="6"
+                                          placeholder="{{ _t('commission.description_placeholder') }}"></textarea>
+                                <div class="form-text">{{ _t('commission.form_hint') }}</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">{{ _t('commission.request_btn') }}</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('admin.messages') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <h1 class="h3 fw-bold mb-0"><i class="bi bi-chat-dots me-2 text-primary"></i>{{ _t('admin.messages') }}</h1>
+        <a href="/admin" class="btn btn-outline-secondary btn-sm">{{ _t('admin.view_all') }}</a>
+    </div>
+
+    <div class="mb-4">
+        <form method="get" action="/admin/messages" class="row g-2 align-items-center">
+            <div class="col-auto flex-grow-1">
+                <input type="text" class="form-control form-control-sm" name="q" value="{{ q|default('') }}"
+                       placeholder="{{ _t('admin.search_messages') }}" aria-label="{{ _t('admin.search_messages') }}">
+            </div>
+            <div class="col-auto">
+                <select name="since" class="form-select form-select-sm">
+                    <option value="" {% if not since %}selected{% endif %}>{{ _t('admin.all_dates') }}</option>
+                    <option value="7" {% if since == '7' %}selected{% endif %}>{{ _t('admin.last_7_days') }}</option>
+                    <option value="30" {% if since == '30' %}selected{% endif %}>{{ _t('admin.last_30_days') }}</option>
+                    <option value="90" {% if since == '90' %}selected{% endif %}>{{ _t('admin.last_90_days') }}</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-search me-1"></i>{{ _t('admin.search_btn') }}
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="submit" name="status_filter" value="" class="btn btn-sm btn-outline-secondary {% if not status_filter %}active{% endif %}">{{ _t('admin.status_all') }}</button>
+                <button type="submit" name="status_filter" value="unread" class="btn btn-sm btn-outline-danger {% if status_filter == 'unread' %}active{% endif %}">{{ _t('admin.status_unread') }}</button>
+                <button type="submit" name="status_filter" value="read" class="btn btn-sm btn-outline-success {% if status_filter == 'read' %}active{% endif %}">{{ _t('admin.status_read') }}</button>
+            </div>
+        </form>
+    </div>
+
+    {% if messages %}
+        <div class="d-flex flex-column gap-3">
+            {% for message in messages %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <h5 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                                    <a href="/admin/messages/{{ message.id }}" class="text-decoration-none text-dark">
+                                        {{ message.subject }}
+                                    </a>
+                                    {% if not message.is_read %}
+                                        <span class="badge text-bg-danger">{{ _t('admin.pending_messages') }}</span>
+                                    {% endif %}
+                                    {% if att_counts and att_counts.get(message.id) %}
+                                        <span class="badge text-bg-secondary" title="{{ _t('admin.attachments') }}">
+                                            <i class="bi bi-paperclip me-1"></i>{{ att_counts.get(message.id) }}
+                                        </span>
+                                    {% endif %}
+                                </h5>
+                                <small class="text-muted">
+                                    <i class="bi bi-person me-1"></i><strong>{{ _t('admin.from') }}:</strong> {{ message.sender_name }} ·
+                                    <i class="bi bi-envelope me-1 ms-1"></i>{{ message.sender_email }} ·
+                                    <i class="bi bi-clock me-1 ms-1"></i>{{ message.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                </small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                {% if not message.is_read %}
+                                    <form method="post" action="/admin/messages/{{ message.id }}/read">
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-check2-circle me-1"></i>{{ _t('admin.mark_read') }}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                <form method="post" action="/admin/messages/{{ message.id }}/delete"
+                                      onsubmit="return confirm('{{ _t('common.confirm') }}')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash me-1"></i>{{ _t('admin.delete') }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <p class="text-muted mb-3 mt-2">{{ message.content }}</p>
+
+                        <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#reply{{ message.id }}" aria-expanded="false" aria-controls="reply{{ message.id }}">
+                            <i class="bi bi-reply me-1"></i>{{ _t('admin.reply') }}
+                        </button>
+                        <div class="collapse mt-3" id="reply{{ message.id }}">
+                            <div class="border rounded p-3 bg-light">
+                                <form method="post" action="/admin/messages/{{ message.id }}/reply" enctype="multipart/form-data">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-semibold small mb-1">{{ _t('admin.attended_by') }}</label>
+                                        <select name="agent" class="form-select form-select-sm mb-2">
+                                            {% for ag in support_agents %}
+                                                <option value="{{ ag }}" {{ 'selected' if loop.first }}>{{ ag }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label class="form-label fw-semibold">{{ _t('admin.reply_to') }}: {{ message.sender_email }}</label>
+                                        <textarea name="reply_content" class="form-control" rows="3"
+                                                  placeholder="{{ _t('admin.reply_placeholder') }}" required></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="files-{{ message.id }}" class="form-label small text-muted">{{ _t('admin.attach_images') }}</label>
+                                        <input type="file" class="form-control form-control-sm" id="files-{{ message.id }}"
+                                               name="files" multiple accept="image/*">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-send me-1"></i>{{ _t('admin.send_reply') }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-envelope-open display-1 text-muted"></i>
+            <p class="lead text-muted mt-3">{{ _t('admin.no_messages') }}</p>
+        </div>
+    {% endif %}
+
+    {% include "partials/pagination.html" %}
+</div>
+{% endblock %}

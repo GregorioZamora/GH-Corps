@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ status_code }} - {{ error_title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center py-5">
+        <div class="display-1 fw-bold text-primary mb-2">{{ status_code }}</div>
+        <h1 class="h3 fw-bold mb-3">{{ error_title }}</h1>
+        <p class="lead text-muted mx-auto mb-4" style="max-width: 480px">{{ error_hint }}</p>
+        <div class="d-flex justify-content-center gap-2">
+            <a href="/" class="btn btn-primary"><i class="bi bi-house me-1"></i>{{ _t('error.back_home') }}</a>
+            <a href="/contact" class="btn btn-outline-secondary">{{ _t('error.contact_us') }}</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

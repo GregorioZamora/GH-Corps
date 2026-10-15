@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('admin.message_detail') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                <h1 class="h3 fw-bold mb-0"><i class="bi bi-chat-dots me-2 text-primary"></i>{{ _t('admin.message_detail') }}</h1>
+                <a href="/admin/messages" class="btn btn-outline-secondary btn-sm">{{ _t('admin.back_to_messages') }}</a>
+            </div>
+
+            {% if request.query_params.get('sent') %}
+                <div class="alert alert-success alert-dismissible d-flex align-items-center fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <div>{{ _t('admin.reply_sent') }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ _t('common.close') }}"></button>
+                </div>
+            {% endif %}
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="h4 fw-bold mb-1">{{ message.subject }}</h2>
+                    <small class="text-muted">
+                        <i class="bi bi-person me-1"></i><strong>{{ _t('admin.from') }}:</strong> {{ message.sender_name }} ·
+                        <i class="bi bi-envelope me-1 ms-1"></i>{{ message.sender_email }} ·
+                        <i class="bi bi-clock me-1 ms-1"></i>{{ message.created_at.strftime('%d/%m/%Y %H:%M') }}
+                    </small>
+                    <hr>
+                    <p class="mb-1 text-break">{{ message.content }}</p>
+                    {% set atts = message.attachments %}
+                    {% include "partials/message_attachments.html" with context %}
+
+                    <div class="d-flex gap-2">
+                        <form method="post" action="/admin/messages/{{ message.id }}/delete"
+                              onsubmit="return confirm('{{ _t('common.confirm') }}')">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-trash me-1"></i>{{ _t('admin.delete') }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {% if thread|length > 1 %}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <strong><i class="bi bi-chat-left-text me-1 text-primary"></i>{{ _t('admin.thread') }}</strong>
+                    </div>
+                    <div class="card-body p-0">
+                        {% for m in thread %}
+                            {% if not loop.first %}
+                                <div class="p-3 {{ 'border-top' if not loop.first }}">
+                                    <small class="text-muted d-flex align-items-center gap-2 mb-1">
+                                        <span class="badge text-bg-primary">
+                                            <i class="bi bi-shield-check me-1"></i>{{ m.sender_name or _t('app_name') }}
+                                        </span>
+                                        <span>{{ m.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                                    </small>
+                                    <p class="mb-0 text-break">{{ m.content }}</p>
+                                    {% set atts = m.attachments %}
+                                    {% include "partials/message_attachments.html" with context %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="h5 fw-bold mb-3"><i class="bi bi-reply me-2 text-primary"></i>{{ _t('admin.reply') }}</h3>
+                    <form method="post" action="/admin/messages/{{ message.id }}/reply" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="agent" class="form-label fw-semibold">{{ _t('admin.attended_by') }}</label>
+                            <select name="agent" id="agent" class="form-select">
+                                {% for ag in support_agents %}
+                                    <option value="{{ ag }}" {{ 'selected' if loop.first }}>{{ ag }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">{{ _t('admin.reply_to') }}: {{ message.sender_email }}</label>
+                            <textarea name="reply_content" class="form-control" rows="5"
+                                      placeholder="{{ _t('admin.reply_placeholder') }}" required></textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label for="attach-files" class="form-label small text-muted">{{ _t('admin.attach_images') }}</label>
+                            <input type="file" class="form-control" id="attach-files" name="files" multiple accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-1"></i>{{ _t('admin.send_reply') }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('admin.dashboard_title') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <h1 class="h3 fw-bold mb-0"><i class="bi bi-speedometer2 me-2 text-warning"></i>{{ _t('admin.dashboard_title') }}</h1>
+        <div class="d-flex gap-2">
+            <a href="/admin/orders" class="btn btn-outline-primary btn-sm">{{ _t('admin.orders') }}</a>
+            <a href="/admin/commissions" class="btn btn-outline-primary btn-sm">{{ _t('admin.commissions_title') }}</a>
+            <a href="/admin/customers" class="btn btn-outline-primary btn-sm">{{ _t('admin.customers') }}</a>
+            <a href="/admin/messages" class="btn btn-outline-primary btn-sm">{{ _t('admin.messages') }}</a>
+            <a href="/admin/products" class="btn btn-outline-primary btn-sm">{{ _t('admin.products') }}</a>
+            <a href="/admin/reviews" class="btn btn-outline-primary btn-sm">{{ _t('admin.reviews') }}</a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card stat-card border-0 shadow-sm text-center p-3">
+                <span class="stat-icon mb-2 d-inline-flex align-items-center justify-content-center mx-auto">
+                    <i class="bi bi-bag-check-fill text-primary"></i>
+                </span>
+                <h2 class="fw-bold mb-0">{{ total_orders }}</h2>
+                <small class="text-muted">{{ _t('admin.total_orders') }}</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card stat-card border-0 shadow-sm text-center p-3">
+                <span class="stat-icon mb-2 d-inline-flex align-items-center justify-content-center mx-auto">
+                    <i class="bi bi-people-fill text-success"></i>
+                </span>
+                <h2 class="fw-bold mb-0">{{ total_customers }}</h2>
+                <small class="text-muted">{{ _t('admin.total_customers') }}</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card stat-card border-0 shadow-sm text-center p-3">
+                <span class="stat-icon mb-2 d-inline-flex align-items-center justify-content-center mx-auto">
+                    <i class="bi bi-currency-euro text-warning"></i>
+                </span>
+                <h2 class="fw-bold mb-0">{{ total_revenue }}€</h2>
+                <small class="text-muted">{{ _t('admin.total_revenue') }}</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card stat-card border-0 shadow-sm text-center p-3">
+                <span class="stat-icon mb-2 d-inline-flex align-items-center justify-content-center mx-auto">
+                    <i class="bi bi-envelope-exclamation-fill text-danger"></i>
+                </span>
+                <h2 class="fw-bold mb-0">{{ unread_messages }}</h2>
+                <small class="text-muted">{{ _t('admin.pending_messages') }}</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card stat-card border-0 shadow-sm text-center p-3">
+                <span class="stat-icon mb-2 d-inline-flex align-items-center justify-content-center mx-auto">
+                    <i class="bi bi-box-seam-fill text-info"></i>
+                </span>
+                <h2 class="fw-bold mb-0">{{ total_products }}</h2>
+                <small class="text-muted">{{ _t('admin.products') }}</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card stat-card border-0 shadow-sm text-center p-3">
+                <span class="stat-icon mb-2 d-inline-flex align-items-center justify-content-center mx-auto">
+                    <i class="bi bi-star-fill text-warning"></i>
+                </span>
+                <h2 class="fw-bold mb-0">{{ total_reviews }}</h2>
+                <small class="text-muted">{{ _t('admin.total_reviews') }}</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <strong><i class="bi bi-bar-chart-line me-1 text-primary"></i>{{ _t('admin.monthly_sales') }}</strong>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{{ _t('admin.month') }}</th>
+                                    <th class="text-center">{{ _t('admin.orders') }}</th>
+                                    <th class="text-end">{{ _t('admin.income') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in monthly_sales %}
+                                    <tr>
+                                        <td>{{ m.label[5:7] }}/{{ m.label[:4] }}</td>
+                                        <td class="text-center">
+                                            {{ m.orders }}
+                                            {% if m.orders %}
+                                                <div class="progress" style="height:5px" role="progressbar" aria-valuenow="{{ m.orders }}" aria-valuemin="0" aria-valuemax="{{ max_monthly_orders or 1 }}">
+                                                    <div class="progress-bar bg-primary" style="width: {{ (m.orders * 100 / (max_monthly_orders or 1)) | round(0) }}%"></div>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end fw-semibold">{{ m.revenue | round(2) }}€</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <strong><i class="bi bi-trophy me-1 text-warning"></i>{{ _t('admin.top_products') }}</strong>
+                </div>
+                <div class="card-body p-0">
+                    {% if top_products %}
+                        <ul class="list-group list-group-flush">
+                            {% for p in top_products %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="me-2">
+                                        <strong class="d-block text-truncate" style="max-width: 300px">{{ p.name }}</strong>
+                                        <small class="text-muted">{{ p.sold }} {{ _t('admin.sold') }}</small>
+                                    </div>
+                                    <span class="fw-bold text-primary">{{ p.revenue | round(2) }}€</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted text-center p-3 mb-0">{{ _t('admin.no_sales') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <strong>{{ _t('admin.order_list') }}</strong>
+                    <a href="/admin/orders" class="btn btn-sm btn-link text-decoration-none">{{ _t('admin.view_all') }}</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_orders %}
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>{{ _t('admin.customer_name') }}</th>
+                                        <th>{{ _t('client.total') }}</th>
+                                        <th>{{ _t('client.status') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recent_orders %}
+                                        <tr>
+                                            <td class="fw-semibold">{{ order.id }}</td>
+                                            <td>{{ users.get(order.user_id).full_name if users.get(order.user_id) else '—' }}</td>
+                                            <td>{{ order.total_price }}€</td>
+                                            <td>
+                                                <span class="badge text-bg-{{ 'success' if order.status == 'completado' else 'warning' if order.status == 'pendiente' else 'primary' if order.status == 'pagado' else 'info' if order.status == 'enviado' else 'secondary' }}">
+                                                    {{ order.status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center p-3 mb-0">{{ _t('admin.no_orders') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <strong>{{ _t('admin.messages') }}</strong>
+                    <a href="/admin/messages" class="btn btn-sm btn-link text-decoration-none">{{ _t('admin.view_all') }}</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_messages %}
+                        <ul class="list-group list-group-flush">
+                            {% for message in recent_messages %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="me-2">
+                                            <a href="/admin/messages/{{ message.id }}" class="text-decoration-none text-dark">
+                                                <strong>{{ message.subject }}</strong>
+                                            </a>
+                                            {% if not message.is_read %}<span class="badge text-bg-danger">{{ _t('admin.pending_messages') }}</span>{% endif %}
+                                            <small class="d-block text-muted">
+                                                {{ message.sender_name }} · {{ message.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted text-center p-3 mb-0">{{ _t('admin.no_messages') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <strong>{{ _t('admin.commissions_title') }}</strong>
+                    <a href="/admin/commissions" class="btn btn-sm btn-link text-decoration-none">{{ _t('admin.view_all') }}</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_commissions %}
+                        <ul class="list-group list-group-flush">
+                            {% for commission in recent_commissions %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="me-2">
+                                            <a href="/admin/commissions/{{ commission.id }}" class="text-decoration-none text-dark">
+                                                <strong>{{ commission.title }}</strong>
+                                            </a>
+                                            {% if recent_unread_commissions.get(commission.id) %}
+                                                <span class="badge text-bg-danger ms-1" title="{{ _t('admin.unread_messages') }}">{{ recent_unread_commissions[commission.id] }}</span>
+                                            {% endif %}
+                                            <small class="d-block text-muted">
+                                                {{ commission.client_name or _t('client.you_title') }}
+                                                · {{ commission.updated_at.strftime('%d/%m/%Y') }}
+                                            </small>
+                                        </div>
+                                        <span class="badge {% if commission.status == 'completado' %}text-bg-success{% elif commission.status == 'revision' %}text-bg-info{% else %}text-bg-primary{% endif %}">
+                                            {{ _t('commission.status_' ~ commission.status) }}
+                                        </span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted text-center p-3 mb-0">{{ _t('admin.no_commissions') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

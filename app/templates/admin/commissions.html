@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('admin.commissions_title') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h1 class="h3 fw-bold mb-1">{{ _t('admin.commissions_title') }}</h1>
+            <p class="text-muted mb-0">{{ _t('admin.commissions_desc') }}</p>
+        </div>
+        <div>
+            <form method="get" action="/admin/commissions" class="row g-2 align-items-center justify-content-end">
+                <div class="col-auto">
+                    <input type="text" class="form-control form-control-sm" name="q" value="{{ q|default('') }}"
+                           placeholder="{{ _t('admin.search_commissions') }}" aria-label="{{ _t('admin.search_commissions') }}">
+                </div>
+                <div class="col-auto">
+                    <select name="since" class="form-select form-select-sm">
+                        <option value="" {% if not since %}selected{% endif %}>{{ _t('admin.all_dates') }}</option>
+                        <option value="7" {% if since == '7' %}selected{% endif %}>{{ _t('admin.last_7_days') }}</option>
+                        <option value="30" {% if since == '30' %}selected{% endif %}>{{ _t('admin.last_30_days') }}</option>
+                        <option value="90" {% if since == '90' %}selected{% endif %}>{{ _t('admin.last_90_days') }}</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-search me-1"></i>{{ _t('admin.search_btn') }}
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" name="status_filter" value="" class="btn btn-sm btn-outline-secondary {% if not status_filter %}active{% endif %}">{{ _t('admin.all') }}</button>
+                    <button type="submit" name="status_filter" value="en_proceso" class="btn btn-sm btn-outline-primary {% if status_filter == 'en_proceso' %}active{% endif %}">{{ _t('commission.status_en_proceso') }}</button>
+                    <button type="submit" name="status_filter" value="revision" class="btn btn-sm btn-outline-info {% if status_filter == 'revision' %}active{% endif %}">{{ _t('commission.status_revision') }}</button>
+                    <button type="submit" name="status_filter" value="completado" class="btn btn-sm btn-outline-success {% if status_filter == 'completado' %}active{% endif %}">{{ _t('commission.status_completado') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{ _t('commission.title_label') }}</th>
+                        <th>{{ _t('admin.customer') }}</th>
+                        <th>{{ _t('commission.status') }}</th>
+                        <th>{{ _t('commission.updated') }}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in commissions %}
+                        <tr>
+                            <td class="fw-semibold">
+                                <a href="/admin/commissions/{{ c.id }}" class="text-decoration-none">{{ c.title }}</a>
+                                {% if unread_counts.get(c.id) %}
+                                    <span class="badge text-bg-danger ms-1" title="{{ _t('admin.unread_messages') }}">{{ unread_counts[c.id] }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if c.user_id and users.get(c.user_id) %}
+                                    {{ users[c.user_id].full_name }}<br>
+                                    <small class="text-muted">{{ users[c.user_id].email }}</small>
+                                {% else %}
+                                    {{ c.client_name or '—' }}<br>
+                                    <small class="text-muted">{{ c.client_email or '' }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge {% if c.status == 'completado' %}text-bg-success{% elif c.status == 'revision' %}text-bg-info{% else %}text-bg-primary{% endif %}">
+                                    {{ _t('commission.status_' ~ c.status) }}
+                                </span>
+                            </td>
+                            <td class="text-muted small">{{ c.updated_at.strftime('%d/%m/%Y') }}</td>
+                            <td class="text-end">
+                                <a href="/admin/commissions/{{ c.id }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-chat-dots me-1"></i>{{ _t('admin.view') }}
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="5" class="text-center text-muted py-4">{{ _t('commission.no_commissions') }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% include "partials/pagination.html" %}
+</div>
+{% endblock %}

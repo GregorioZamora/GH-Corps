@@ -1,0 +1,11 @@
+{% if atts %}
+    <div class="d-flex flex-wrap gap-2 mt-3">
+        {% for a in atts %}
+            <a href="/uploads/{{ a.path.split('/')[-1].split('\\')[-1] }}" target="_blank" rel="noopener"
+               class="text-decoration-none" title="{{ a.filename }}">
+                <img src="/uploads/{{ a.path.split('/')[-1].split('\\')[-1] }}" alt="{{ a.filename }}"
+                     class="rounded border message-attachment" loading="lazy">
+            </a>
+        {% endfor %}
+    </div>
+{% endif %}

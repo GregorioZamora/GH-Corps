@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _t('admin.customers') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <h1 class="h3 fw-bold mb-0"><i class="bi bi-people me-2 text-success"></i>{{ _t('admin.customers') }}</h1>
+        <a href="/admin" class="btn btn-outline-secondary btn-sm">{{ _t('admin.view_all') }}</a>
+    </div>
+
+    <form method="get" action="/admin/customers" class="row g-2 mb-4">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="{{ search }}" class="form-control"
+                       placeholder="{{ _t('admin.search') }}">
+            </div>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+        </div>
+    </form>
+
+    {% if customers %}
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>{{ _t('admin.customer_name') }}</th>
+                            <th>{{ _t('admin.customer_email') }}</th>
+                            <th>{{ _t('admin.customer_gender') }}</th>
+                            <th>{{ _t('admin.customer_account_type') }}</th>
+                            <th><i class="bi bi-shield-lock me-1"></i>{{ _t('admin.customer_role') }}</th>
+                            <th>{{ _t('admin.registered_at') }}</th>
+                            <th class="text-center">{{ _t('admin.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                            <tr>
+                                <td class="fw-semibold">{{ customer.id }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if customer.avatar_url %}
+                                            <img src="{{ customer.avatar_url }}" alt="" class="rounded-circle" width="28" height="28">
+                                        {% else %}
+                                            <span class="avatar-mini rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center">
+                                                <i class="bi bi-person-fill"></i>
+                                            </span>
+                                        {% endif %}
+                                        {{ customer.full_name }}
+                                    </div>
+                                </td>
+                                <td>{{ customer.email }}</td>
+                                <td>{{ customer.gender or '—' }}</td>
+                                <td>{{ customer.account_type or '—' }}</td>
+                                <td>
+                                    <span class="badge text-bg-{{ 'warning' if customer.role == 'admin' else 'info' }}">{{ customer.role }}</span>
+                                </td>
+                                <td>{{ customer.created_at.strftime('%d/%m/%Y') }}</td>
+                                <td class="text-center">
+                                    <a href="/contact?to={{ customer.email }}" class="btn btn-sm btn-outline-primary" title="{{ _t('admin.reply') }}">
+                                        <i class="bi bi-envelope-plus"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-people display-1 text-muted"></i>
+            <p class="lead text-muted mt-3">{{ _t('admin.no_customers') }}</p>
+        </div>
+    {% endif %}
+
+    {% include "partials/pagination.html" %}
+</div>
+{% endblock %}
