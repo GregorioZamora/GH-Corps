@@ -62,8 +62,6 @@ Cuando aparezca Application startup complete abre este enlace:
 ## Para parar
 Pulsa Ctrl+C en la terminal.
 
-## Datos de prueba
-- Admin: infoghdisenos@gmail.com / dmin1234
 
 ## Solución rápida si falla
 Si ves errores raros, cierra VS Code, vuelve a abrir la carpeta, activa env e instala dependencias otra vez.
