@@ -1,4 +1,4 @@
-# Cómo iniciar el proyecto GH Diseños
+﻿# CÃ³mo iniciar el proyecto GH DiseÃ±os
 
 ## Requisitos
 - Python 3.11.5 o superior
@@ -51,8 +51,6 @@ python -m uvicorn main:app --host 127.0.0.1 --port 8000
 7. **Abrir en el navegador**
 Ve a [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-## Datos de prueba
-- Admin: `infoghdisenos@gmail.com` / `admin1234`
 
 ## Tests
 Para ejecutar smoke + i18n desde PowerShell (test):
